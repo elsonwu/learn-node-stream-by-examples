@@ -4,6 +4,12 @@
 
 # Why stream?
 
+```javascript
+// Are you read the whole file then parse it into json like this?
+// But how about a file its size is 1TB?
+JSON.parse(fileData)
+```
+
 - When handling large file, should load the data a bit by a bit instead of all at once.
 - Small amount of memory can handle large file
 
@@ -13,7 +19,39 @@
 - Writable stream: the destination, which should write the data into.
 - Duplex & transform: the middleware, which is writable and readable, we'll focus on transform stream.
 
+```javascript
+// Let's compare these two
 
+// Read the whole file into memory then process which would take a lot memory when the file size is huge.
++------------+                       +------------+                       +------------+
+|            |                       |            |                       |            |
+| Large File | --------------------> |   Memory   | --------------------> | destination| 
+|            |                       |            |                       |            |
++------------+                       +------------+                       +------------+
+  
+  
+// Stream (one readable + one writeable stream), read the file in chunk-based, process a bit by a bit.
++------------+                                                            +------------+  
+|            |     +-----+    +-----+    +-----+    +-----+    +-----+    |            |
+| Large File | --->|chunk|--->|chunk|--->|chunk|--->|chunk|--->|chunk|--->| destination| 
+|            |     +-----+    +-----+    +-----+    +-----+    +-----+    |            |
++------------+                                                            +------------+
+      |                                                                         |
+Readable Stream                                                           Writable Stream
+      
+// Stream, have one or more transform streams.
++------------+                                                            +------------+  
+|            |     +-----+    +-----+    +-----+    +-----+    +-----+    |            |
+| Large File | --->|chunk|--->|chunk|--->|  T  |--->|chunk|--->|chunk|--->| destination| 
+|            |     +-----+    +-----+    +-----+    +-----+    +-----+    |            |
++------------+                              |                             +------------+
+      |                                     |                                   |
+Readable Stream                       Transform Stream                    Writable Stream
+  
+
+// Think about stream is something like pipe in shell
+> command1 | command2 | command3 > dump
+```
 
 # With vs without stream
 
